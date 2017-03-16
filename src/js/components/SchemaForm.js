@@ -362,9 +362,15 @@ class SchemaForm extends mixin(StoreMixin, InternalStorageMixin) {
   }
 
   getFormHeader() {
-    const {packageIcon, packageName, packageVersion} = this.props;
+    const {
+      packageIcon,
+      packageName,
+      packageVersion,
+      showHeader,
+      tabFormProps
+    } = this.props;
 
-    if (!packageName || !packageIcon) {
+    if (!packageName || !packageIcon || !showHeader) {
       return null;
     }
 
@@ -403,7 +409,8 @@ class SchemaForm extends mixin(StoreMixin, InternalStorageMixin) {
           formRowClass="flex"
           getTriggerSubmit={this.getTriggerTabFormSubmit}
           onChange={this.handleFormChange}
-          onTabClick={this.handleTabClick} />
+          onTabClick={this.handleTabClick}
+          {...this.props.tabFormProps} />
       </div>
     );
   }
@@ -413,7 +420,9 @@ SchemaForm.defaultProps = {
   className: 'multiple-form',
   getTriggerSubmit() {},
   onChange() {},
-  schema: {}
+  schema: {},
+  showHeader: true,
+  tabFormProps: {}
 };
 
 SchemaForm.propTypes = {
@@ -421,7 +430,9 @@ SchemaForm.propTypes = {
   schema: React.PropTypes.object,
   packageIcon: React.PropTypes.string,
   packageName: React.PropTypes.string,
-  packageVersion: React.PropTypes.string
+  packageVersion: React.PropTypes.string,
+  showHeader: React.PropTypes.bool,
+  tabFormProps: React.PropTypes.object
 };
 
 module.exports = SchemaForm;

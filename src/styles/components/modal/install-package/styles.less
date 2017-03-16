@@ -97,5 +97,233 @@
         }
       }
     }
+
+    &--install-package {
+
+      &__form {
+
+        &__wrapper {
+          display: flex;
+          flex: 1 1 auto;
+
+          .tab-form-wrapper,
+          .multiple-form {
+            display: flex;
+            flex: 1 1 auto;
+          }
+
+          .multiple-form {
+            flex-direction: row;
+
+            &-left-column {
+              &:extend(.menu-tabbed-vertical all);
+              flex: 0 0 auto;
+
+              // We need extra specificity to override the multiple-form
+              // styling.
+              .multiple-form {
+
+                &-modal {
+
+                  &-sidebar {
+
+                    &-menu-item {
+                      &:extend(.menu-tabbed-item-label all);
+                      font-size: inherit;
+                      margin: 0;
+                      overflow: hidden;
+                      padding-left: 0;
+                      padding-bottom: @menu-tabbed-vertical-item-link-padding-bottom;
+                      padding-top: @menu-tabbed-vertical-item-link-padding-top;
+                      text-overflow: ellipsis;
+
+                      &.selected {
+                        border-right: none;
+
+                        &:after {
+                          bottom: 0;
+                          height: 100%;
+                          left: auto;
+                          right: 0;
+                          width: 2px;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            &-right-column {
+              flex: 1 1 auto;
+              min-width: 1px;
+
+              .form-panel {
+                max-width: 100%;
+                overflow: hidden;
+              }
+            }
+
+            &-modal {
+
+              &-sidebar {
+
+                &-tabs {
+                  padding-top: 0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+& when (@install-package-modal-enabled) and (@layout-screen-small-enabled) {
+
+  .modal {
+
+    &--install-package {
+
+      &__form {
+
+        &__wrapper {
+
+          .multiple-form {
+
+            &-left-column {
+
+              // We need extra specificity to override the multiple-form
+              // styling.
+              .multiple-form {
+
+                &-modal {
+
+                  &-sidebar {
+
+                    &-menu-item {
+                      padding-bottom: @menu-tabbed-vertical-item-link-padding-bottom-screen-small;
+                      padding-top: @menu-tabbed-vertical-item-link-padding-top-screen-small;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+& when (@install-package-modal-enabled) and (@layout-screen-medium-enabled) {
+
+  .modal {
+
+    &--install-package {
+
+      &__form {
+
+        &__wrapper {
+
+          .multiple-form {
+
+            &-left-column {
+
+              // We need extra specificity to override the multiple-form
+              // styling.
+              .multiple-form {
+
+                &-modal {
+
+                  &-sidebar {
+
+                    &-menu-item {
+                      padding-bottom: @menu-tabbed-vertical-item-link-padding-bottom-screen-medium;
+                      padding-top: @menu-tabbed-vertical-item-link-padding-top-screen-medium;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+& when (@install-package-modal-enabled) and (@layout-screen-large-enabled) {
+
+  .modal {
+
+    &--install-package {
+
+      &__form {
+
+        &__wrapper {
+
+          .multiple-form {
+
+            &-left-column {
+
+              // We need extra specificity to override the multiple-form
+              // styling.
+              .multiple-form {
+
+                &-modal {
+
+                  &-sidebar {
+
+                    &-menu-item {
+                      padding-bottom: @menu-tabbed-vertical-item-link-padding-bottom-screen-large;
+                      padding-top: @menu-tabbed-vertical-item-link-padding-top-screen-large;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+& when (@install-package-modal-enabled) and (@layout-screen-jumbo-enabled) {
+
+  .modal {
+
+    &--install-package {
+
+      &__form {
+
+        &__wrapper {
+
+          .multiple-form {
+
+            &-left-column {
+
+              // We need extra specificity to override the multiple-form
+              // styling.
+              .multiple-form {
+
+                &-modal {
+
+                  &-sidebar {
+
+                    &-menu-item {
+                      padding-bottom: @menu-tabbed-vertical-item-link-padding-bottom-screen-jumbo;
+                      padding-top: @menu-tabbed-vertical-item-link-padding-top-screen-jumbo;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

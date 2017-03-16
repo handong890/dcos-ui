@@ -8,6 +8,10 @@ import CosmosErrorHeader from '../CosmosErrorHeader';
 import CosmosErrorMessage from '../CosmosErrorMessage';
 import CosmosPackagesStore from '../../stores/CosmosPackagesStore';
 import defaultServiceImage from '../../../../plugins/services/src/img/icon-service-default-large@2x.png';
+import FullScreenModal from './FullScreenModal';
+import FullScreenModalHeader from './FullScreenModalHeader';
+import FullScreenModalHeaderActions from './FullScreenModalHeaderActions';
+import FullScreenModalHeaderTitle from './FullScreenModalHeaderTitle';
 import Icon from '../Icon';
 import Image from '../Image';
 import InternalStorageMixin from '../../mixins/InternalStorageMixin';
@@ -203,11 +207,9 @@ class InstallPackageModal extends mixin(InternalStorageMixin, TabsMixin, StoreMi
 
   getPackageConfiguration() {
     const {advancedConfiguration} = this.internalStorage_get();
-    const {currentTab} = this.state;
     const cosmosPackage = CosmosPackagesStore.getPackageDetails();
 
-    const isAdvancedInstall = currentTab === 'advancedInstall' ||
-      currentTab === 'reviewAdvancedConfig';
+    const isAdvancedInstall = this.isAdvancedInstallActive();
 
     if (isAdvancedInstall && advancedConfiguration) {
       return advancedConfiguration;
@@ -372,6 +374,9 @@ class InstallPackageModal extends mixin(InternalStorageMixin, TabsMixin, StoreMi
   }
 
   renderAdvancedInstallTabView() {
+    // TODO: Move the pending logic to the getPrimaryActions method.
+    return null;
+
     const {pendingRequest, hasFormErrors} = this.internalStorage_get();
     const cosmosPackage = CosmosPackagesStore.getPackageDetails();
 
@@ -394,7 +399,6 @@ class InstallPackageModal extends mixin(InternalStorageMixin, TabsMixin, StoreMi
         </div>
       </div>
     );
-
   }
 
   renderReviewAdvancedConfigTabView() {
@@ -542,6 +546,46 @@ class InstallPackageModal extends mixin(InternalStorageMixin, TabsMixin, StoreMi
     );
   }
 
+  getHeader() {
+    if (this.isAdvancedInstallActive()) {
+      const cosmosPackage = CosmosPackagesStore.getPackageDetails();
+
+      return (
+        <FullScreenModalHeader>
+          <FullScreenModalHeaderActions
+            actions={this.getSecondaryActions()}
+            type="secondary" />
+          <FullScreenModalHeaderTitle>
+            <div className="media-object-spacing-wrapper media-object-spacing-narrow media-object-offset">
+              <div className="media-object media-object-align-middle">
+                <div className="media-object-item">
+                  <div className="icon icon-medium icon-image-container icon-app-container icon-default-white">
+                    <Image
+                      fallbackSrc={defaultServiceImage}
+                      src={cosmosPackage.getIcons()['icon-small']} />
+                  </div>
+                </div>
+                <div className="media-object-item">
+                  <h4 className="flush-top flush-bottom text-color-neutral">
+                    {cosmosPackage.getName()}
+                  </h4>
+                  <span className="side-panel-resource-label">
+                    {cosmosPackage.getCurrentVersion()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </FullScreenModalHeaderTitle>
+          <FullScreenModalHeaderActions
+            actions={this.getPrimaryActions()}
+            type="primary" />
+        </FullScreenModalHeader>
+      );
+    }
+
+    return null;
+  }
+
   getModalContents() {
     const {currentTab, schemaIncorrect} = this.state;
     const {isLoading} = this.internalStorage_get();
@@ -561,35 +605,67 @@ class InstallPackageModal extends mixin(InternalStorageMixin, TabsMixin, StoreMi
 
     const name = cosmosPackage.getName();
     const version = cosmosPackage.getCurrentVersion();
-    const advancedConfigClasses = classNames('modal-install-package-body-and-header', {
+    const advancedConfigClasses = classNames('modal-body-offset', {
       hidden: currentTab !== 'advancedInstall'
     });
 
+    // TODO:
+    // - Abstract all "create-service" classes into more generic full-screen modal classes.
+    // - Move inline styles to actual CSS.
     return (
-      <div className="modal-install-package-tab-form-wrapper">
-        <div className={advancedConfigClasses}>
-          <SchemaForm
-            packageIcon={cosmosPackage.getIcons()['icon-small']}
-            packageName={name}
-            packageVersion={version}
-            schema={cosmosPackage.getConfig()}
-            onChange={this.handleAdvancedFormChange}
-            getTriggerSubmit={this.getAdvancedSubmit} />
+      <div className="flex flex-item-grow-1" style={{display: 'flex', flexDirection: 'column'}}>
+        <div className={advancedConfigClasses} style={{display: 'flex', flex: '1 0 auto', flexDirection: 'row'}}>
+          <div className="modal-body-padding-surrogate create-service-modal-form-container">
+            <div className="container container-wide modal--install-package__form__wrapper">
+              <SchemaForm
+                packageIcon={cosmosPackage.getIcons()['icon-small']}
+                packageName={name}
+                packageVersion={version}
+                schema={cosmosPackage.getConfig()}
+                showHeader={false}
+                onChange={this.handleAdvancedFormChange}
+                getTriggerSubmit={this.getAdvancedSubmit}
+                tabFormProps={{formContentClassNames: 'gm-scrollbar-container-flex'}} />
+            </div>
+          </div>
         </div>
         {this.tabs_getTabView()}
       </div>
     );
   }
 
-  render() {
-    const {props, state} = this;
-    const {currentTab} = state;
+  getSecondaryActions() {
+    return [
+      {
+        className: 'button-stroke',
+        clickHandler: this.handleChangeTab.bind(this, 'defaultInstall'),
+        label: 'Back'
+      }
+    ];
+  }
 
-    const isAdvanced = currentTab === 'advancedInstall' ||
+  getPrimaryActions() {
+    return [
+      {
+        className: 'button-primary flush-vertical',
+        clickHandler: this.handleChangeTab.bind(this, 'reviewAdvancedConfig'),
+        label: 'Review & Install'
+      }
+    ];
+  }
+
+  isAdvancedInstallActive() {
+    const {currentTab} = this.state;
+
+    return currentTab === 'advancedInstall' ||
       currentTab === 'reviewAdvancedConfig';
+  }
 
-    const backdropClasses = classNames({
-      'modal-backdrop': true,
+  render() {
+    const {props} = this;
+    const isAdvanced = this.isAdvancedInstallActive();
+
+    const backdropClasses = classNames('modal-backdrop', {
       'default-cursor': isAdvanced
     });
 
@@ -601,6 +677,21 @@ class InstallPackageModal extends mixin(InternalStorageMixin, TabsMixin, StoreMi
     const modalWrapperClasses = classNames({
       'multiple-form-modal modal-form': isAdvanced
     });
+
+    if (isAdvanced) {
+      return (
+        <FullScreenModal
+          backdropClass={backdropClasses}
+          closeByBackdropClick={!isAdvanced}
+          header={this.getHeader()}
+          onClose={this.handleModalClose}
+          open={props.open}
+          showFooter={false}
+          useGemini={false}>
+          {this.getModalContents()}
+        </FullScreenModal>
+      );
+    }
 
     return (
       <Modal
