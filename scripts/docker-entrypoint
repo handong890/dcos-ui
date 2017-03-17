@@ -1,0 +1,34 @@
+#!/bin/bash
+# This script is executed in the development docker image when the user
+# runs any command within it. It's purpose is to check the if scaffolding
+# is needed and apply it.
+
+# The docker file has a cached version of the dependencies in a node_modules
+# folder in /var/lib. In oder to speed things up don't copy, just sym-link to
+# the user's mountpoint
+if [[ ! -d node_modules && ! -h node_modules ]]; then
+  ln -s /var/lib/node_modules
+fi
+
+#
+# Run preinstall if pre-install dependencies are missing. These are:
+#
+# - Marathon RAM Files
+#
+if [[ ! -d src/resources/raml/marathon ]]; then
+  ./scripts/pre-install
+fi
+
+#
+# Run scaffold if some files are missing:
+#
+# - src/js/config/Config.dev.js
+# - webpack/proxy.dev.js
+#
+if [[ ! -f ./src/js/config/Config.dev.js || ! -f ./webpack/proxy.dev.js ]]; then
+  npm run scaffold
+fi
+
+# Pass through everything else
+echo $*
+$*
