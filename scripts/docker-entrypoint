@@ -11,6 +11,13 @@ if [[ ! -d node_modules && ! -h node_modules ]]; then
 fi
 
 #
+# Define externalplugins if we have mounted such directory
+#
+if [[ -d /dcos-ui-plugins-private ]]; then
+  npm config set externalplugins ../dcos-ui-plugins-private
+fi
+
+#
 # Run preinstall if pre-install dependencies are missing. These are:
 #
 # - Marathon RAM Files

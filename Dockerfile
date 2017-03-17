@@ -9,8 +9,8 @@ ENV CYPRESS_VERSION="0.19.1" \
 EXPOSE 4200
 
 # Copy required files in order to be able to do npm install
-WORKDIR /home
-COPY package.json npm-shrinkwrap.json scripts /home/
+WORKDIR /dcos-ui
+COPY package.json npm-shrinkwrap.json scripts /dcos-ui/
 
 # Copy the entrypoint script that takes care of executing run-time init tasks,
 # such as creating the scaffold in the user's repository
@@ -27,9 +27,10 @@ RUN set -x \
   && apt-get update \
   && apt-get install -y xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 \
   && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
 
   # Install npm dependencies (includes cypress-cli)
-  && cd /home \
+  && cd /dcos-ui \
   && npm install \
 
   # Install cypress
@@ -50,4 +51,4 @@ RUN set -x \
 ENTRYPOINT [ "/bin/bash", "/usr/local/bin/dcos-ui-docker-entrypoint" ]
 
 # Export the working directory
-VOLUME /home
+VOLUME /dcos-ui
