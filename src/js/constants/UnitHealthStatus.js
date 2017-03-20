@@ -1,23 +1,46 @@
+/**
+ * Values for health rate defined in the server
+ */
+const SERVER_HEALTHY = 0;
+const SERVER_UNHEALTHY = 1;
+const SERVER_WARN = 2;
+const SERVER_NA = 3;
+
 const UnitHealthStatus = {
-  HEALTHY: {
+  [SERVER_HEALTHY]: {
     title: 'Healthy',
-    value: 0,
-    classNames: 'text-success'
+    key: 'HEALTHY',
+    classNames: 'text-success',
+    sortingValue: 3,
+    value: 0
   },
-  UNHEALTHY: {
+  [SERVER_UNHEALTHY]: {
     title: 'Unhealthy',
-    value: 1,
-    classNames: 'text-danger'
+    key: 'UNHEALTHY',
+    classNames: 'text-danger',
+    sortingValue: 0,
+    value: 1
   },
-  WARN: {
+  [SERVER_WARN]: {
     title: 'Warning',
-    value: 2,
-    classNames: 'text-warning'
+    key: 'WAR',
+    classNames: 'text-warning',
+    sortingValue: 2,
+    value: 2
+  },
+  [SERVER_NA]: {
+    title: 'N/A',
+    key: 'NA',
+    classNames: 'text-mute',
+    sortingValue: 1,
+    value: 3
   },
   NA: {
     title: 'N/A',
-    value: 3,
-    classNames: 'text-mute'
+    key: 'NA',
+    classNames: 'text-mute',
+    sortingValue: 1,
+    value: 3
   }
 };
 

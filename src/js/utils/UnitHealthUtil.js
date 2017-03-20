@@ -27,11 +27,7 @@ const UnitHealthUtil = {
    * @return {Object}       - UnitHealthStatus object.
    */
   getHealth(health) {
-    const healthKey = Object.keys(UnitHealthStatus).find(function (key) {
-      return (UnitHealthStatus[key].value === health);
-    });
-
-    return UnitHealthStatus[healthKey] || UnitHealthStatus.NA;
+    return UnitHealthStatus[health] || UnitHealthStatus.NA;
   },
 
   /**
@@ -50,6 +46,25 @@ const UnitHealthUtil = {
     return items.filter(function (datum) {
       return datum.getHealth().title.toLowerCase() === health;
     });
+  },
+
+  sortHealthByVisibilityImportance(items) {
+    items.sort(function (a, b) {
+      const aHealthScore = a.getHealth().sortingValue;
+      const bHealthScore = b.getHealth().sortingValue;
+
+      if (aHealthScore > bHealthScore) {
+        return 1;
+      }
+
+      if (aHealthScore < bHealthScore) {
+        return -1;
+      }
+
+      return 0;
+    });
+
+    return items;
   }
 
 };

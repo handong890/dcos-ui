@@ -59,7 +59,7 @@ class HealthTab extends React.Component {
       id: 'HEALTH CHECK NAME',
       role: 'ROLE'
     });
-    const sortFunction = UnitHealthUtil.getHealthSortFunction;
+    const sortFunction = UnitHealthUtil.sortHealthByVisibilityImportance;
 
     return [
       {

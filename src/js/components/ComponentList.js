@@ -3,8 +3,6 @@ import {Link} from 'react-router';
 import {List} from 'reactjs-components';
 import React from 'react';
 
-import HealthTypes from '../../../plugins/services/src/js/constants/HealthTypes';
-
 class ComponentList extends React.Component {
 
   getComponentListContent(units) {
@@ -40,28 +38,22 @@ class ComponentList extends React.Component {
   }
 
   getVisibleComponents(units, displayCount) {
-    // HealthTypes gives the sorting weight.
+    /**
+     * Ordering health rate by most important visible top-bottom
+     */
     units = units.sort(function (a, b) {
-      const aHealth = a.getHealth().title.toUpperCase();
-      const bHealth = b.getHealth().title.toUpperCase();
-      const comparison = HealthTypes[aHealth] - HealthTypes[bHealth];
+      const aHealthScore = a.getHealth().sortingValue;
+      const bHealthScore = b.getHealth().sortingValue;
 
-      if (comparison === 0) {
-        const aTitle = a.getTitle();
-        const bTitle = b.getTitle();
-
-        if (aTitle > bTitle) {
-          return 1;
-        }
-
-        if (aTitle < bTitle) {
-          return -1;
-        }
-
-        return 0;
+      if (aHealthScore > bHealthScore) {
+        return 1;
       }
 
-      return comparison;
+      if (aHealthScore < bHealthScore) {
+        return -1;
+      }
+
+      return 0;
     });
 
     if (units.length > displayCount) {
