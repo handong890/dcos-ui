@@ -1,8 +1,15 @@
 #!/bin/bash
 # System test configuration for running tests locally
 
-CLUSTER_URL="http://frontend-elasticl-1xwoghwf7nli8-1499984299.eu-central-1.elb.amazonaws.com"
+# Config
+CLUSTER_URL="$1"
 LOCAL_PORT=8050
+
+# Require a cluster
+if [ -z "$CLUSTER_URL" ]; then
+  echo "Please specify the cluster URL to use"
+  exit 1
+fi
 
 cat <<EOF
 {
