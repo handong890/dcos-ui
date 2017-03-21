@@ -29,16 +29,21 @@ RUN set -x \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
 
-  # Install npm dependencies (includes cypress-cli)
+  # Install npm dependencies
   && cd /dcos-ui \
   && npm install \
+  && npm install -g cypress-cli http-server compression-webpack-plugin \
 
   # Install cypress
-  && ./node_modules/.bin/cypress install --cypress-version ${CYPRESS_VERSION} \
+  && cypress install --cypress-version ${CYPRESS_VERSION} \
 
   # Move node_modules out of the directory to make it clean for mounting
   # this will be brought back in by the entry point
   && mv node_modules /var/lib/ \
+
+  # Calculate the checksum of package.json in order to detect changes that
+  # will trigger a new npm install
+  && sha512sum package.json > /var/lib/package.json.sha512 \
 
   # Ensure entrypoint is executable
   && chmod +x /usr/local/bin/dcos-ui-docker-entrypoint \

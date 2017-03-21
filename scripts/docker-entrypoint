@@ -6,8 +6,15 @@
 # The docker file has a cached version of the dependencies in a node_modules
 # folder in /var/lib. In oder to speed things up don't copy, just sym-link to
 # the user's mountpoint
-if [[ ! -d node_modules && ! -h node_modules ]]; then
-  ln -s /var/lib/node_modules
+if [[ -a node_modules ]]; then
+  mv node_modules _node_modules
+fi
+ln -s /var/lib/node_modules
+
+# If the package.json has changed re-run npm install
+if ! sha512sum -c /var/lib/package.json.sha512 2>/dev/null >/dev/null; then
+  npm install
+  sha512sum package.json > /var/lib/package.json.sha512
 fi
 
 #
@@ -37,5 +44,11 @@ if [[ ! -f ./src/js/config/Config.dev.js || ! -f ./webpack/proxy.dev.js ]]; then
 fi
 
 # Pass through everything else
-echo $*
 $*
+
+# Recover user's version of node_modules at exit
+rm node_modules
+if [[ -a _node_modules ]]; then
+  mv _node_modules node_modules
+fi
+
