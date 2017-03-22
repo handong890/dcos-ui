@@ -7,9 +7,6 @@ pipeline {
         CLUSTER_URL = 'http://icharalam-elasticl-atm3p900pucm-796070874.us-west-2.elb.amazonaws.com'
     }
 
-    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-
-
     stages {
 
         //
@@ -113,6 +110,7 @@ pipeline {
         // After we are done, we will puglish the resulting dist folder on S3
         //
         stage('Publish') {
+            def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
             steps {
                 echo 'Publishing to S3...'
                 unstash 'dist'
