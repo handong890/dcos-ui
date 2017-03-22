@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'cypress'
+        label 'infinity'
     }
 
     stages {
