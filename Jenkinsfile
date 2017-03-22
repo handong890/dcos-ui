@@ -63,15 +63,16 @@ pipeline {
                 echo 'Running Integration Tests...'
                 unstash 'dist'
 
-                // Run inside the container a shell script that is going to run
-                // the HTTP server serving the `dist/` folder and then runs
-                // cypress in the root directory
+                // Run a simple webserver serving the dist folder statically
+                // before we run the cypress tests
+                writeFile file: 'integration-tests.sh', text: '''
+                    http-server -p 4200 dist&
+                    SERVER_PID=$!
+                    cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'
+                    kill $SERVER_PID'''.stripIndent()
+
                 ansiColor('xterm') {
-                    sh '''echo "http-server --proxy-secure=false -P $CLUSTER_URL -p 4200 dist&" > integration-tests.sh
-                    echo "SERVER_PID=\\$!" >> integration-tests.sh
-                    echo "cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'" >> integration-tests.sh
-                    echo "kill \\$SERVER_PID" >> integration-tests.sh
-                    docker run -i --rm --ipc=host \\
+                    sh '''docker run -i --rm --ipc=host \\
                       -v `pwd`:/dcos-ui \\
                       mesosphere/dcos-ui:latest \\
                       bash integration-tests.sh'''
@@ -118,13 +119,31 @@ pipeline {
                 unstash 'dist'
 
                 ansiColor('xterm') {
-                    dir 'dist'
-                    sh 'tar -zcf dcos-$(git rev-parse --short HEAD).tar.gz *'
+                    sh 'cd dist; tar -zcf dcos-$(git rev-parse --short HEAD).tar.gz *'
+                }
+
+                // Upload artifact on the S3 bucket for the DC/OS UI
+                step([$class: 'S3BucketPublisher',
+                    consoleLogLevel: 'INFO',
+                    pluginFailureResultConstraint: 'FAILURE',
+                    entries: [[
+                        sourceFile: 'dist/*.tar.gz',
+                        bucket: 'dcos-ui-builds',
+                        selectedRegion: 'us-west-1',
+                        noUploadOnFailure: true,
+                        managedArtifacts: true,
+                        flatten: true,
+                        showDirectlyInBrowser: true,
+                        keepForever: true
+                    ]],
+                    profileName: 'aws-production',
+                    dontWaitForConcurrentBuildCompletion: false,
+                  ])
                 }
             }
             post {
                 success {
-                    archiveArtifacts '*.tar.gz'
+                    archiveArtifacts 'dist/*.tar.gz'
                 }
             }
         }
