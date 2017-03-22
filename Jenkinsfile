@@ -19,14 +19,18 @@ pipeline {
                 }
             }
         }
-        stage('Integration Tests') {
-            steps {
-                echo 'Running integration tests..'
-            }
-        }
         stage('System Tests') {
             steps {
-                echo 'Running system tests..'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DH_PASSWORD', usernameVariable: 'DH_USERNAME')]) {
+                    echo 'Running integration tests..'
+                    sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
+                    docker run -i --rm --ipc=host \\
+                      -v `pwd`:/dcos-ui \\
+                      mesosphere/dcos-ui:latest \\
+                      dcos-system-test-driver -v ./.systemtest-dev.sh "http://icharalam-elasticl-atm3p900pucm-796070874.us-west-2.elb.amazonaws.com"
+                    '''
+                    junit 'results/results.xml'
+                }
             }
         }
         stage('Publish') {
