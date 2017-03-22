@@ -138,8 +138,7 @@ pipeline {
                     ]],
                     profileName: 'aws-production',
                     dontWaitForConcurrentBuildCompletion: false,
-                  ])
-                }
+                ])
             }
             post {
                 success {
