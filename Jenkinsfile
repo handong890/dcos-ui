@@ -110,15 +110,12 @@ pipeline {
         // After we are done, we will puglish the resulting dist folder on S3
         //
         stage('Publish') {
-            script {
-                def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-            }
             steps {
                 echo 'Publishing to S3...'
                 unstash 'dist'
 
                 dir 'dist'
-                sh 'tar -zcf dcos-${gitCommit}.tar.gz *'
+                sh 'tar -zcf dcos-$(git rev-parse --short HEAD).tar.gz *'
             }
             post {
                 success {
