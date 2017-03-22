@@ -110,7 +110,9 @@ pipeline {
         // After we are done, we will puglish the resulting dist folder on S3
         //
         stage('Publish') {
-            def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+            script {
+                def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+            }
             steps {
                 echo 'Publishing to S3...'
                 unstash 'dist'
