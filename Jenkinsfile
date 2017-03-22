@@ -64,12 +64,10 @@ pipeline {
                 // Run inside the container a shell script that is going to run
                 // the HTTP server serving the `dist/` folder and then runs
                 // cypress in the root directory
-                sh '''cat <<EOF > integration-tests.sh
-                http-server --proxy-secure=false -P $CLUSTER_URL -p 4200 dist&
-                SERVER_PID=\\$!
-                cypress run --reporter junit --reporter-options "mochaFile=cypress/results.xml"
-                kill \\$SERVER_PID
-                EOF
+                sh '''echo "http-server --proxy-secure=false -P $CLUSTER_URL -p 4200 dist&" > integration-tests.sh
+                echo "SERVER_PID=\\$!" >> integration-tests.sh
+                echo "cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'" >> integration-tests.sh
+                echo "kill \\$SERVER_PID" >> integration-tests.sh
                 docker run -i --rm --ipc=host \\
                   -v `pwd`:/dcos-ui \\
                   mesosphere/dcos-ui:latest \\
