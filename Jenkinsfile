@@ -36,12 +36,14 @@ pipeline {
         stage('Unit Tests & Build') {
             steps {
                 echo 'Building DC/OS UI...'
-                sh '''docker run -i --rm \\
-                  -v `pwd`:/dcos-ui \\
-                  -e JENKINS_VERSION="yes" \\
-                  mesosphere/dcos-ui:latest \\
-                  npm run build
-                '''
+                ansiColor('xterm') {
+                    sh '''docker run -i --rm \\
+                      -v `pwd`:/dcos-ui \\
+                      -e JENKINS_VERSION="yes" \\
+                      mesosphere/dcos-ui:latest \\
+                      npm run build
+                    '''
+                }
             }
             post {
                 always {
@@ -64,14 +66,16 @@ pipeline {
                 // Run inside the container a shell script that is going to run
                 // the HTTP server serving the `dist/` folder and then runs
                 // cypress in the root directory
-                sh '''echo "http-server --proxy-secure=false -P $CLUSTER_URL -p 4200 dist&" > integration-tests.sh
-                echo "SERVER_PID=\\$!" >> integration-tests.sh
-                echo "cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'" >> integration-tests.sh
-                echo "kill \\$SERVER_PID" >> integration-tests.sh
-                docker run -i --rm --ipc=host \\
-                  -v `pwd`:/dcos-ui \\
-                  mesosphere/dcos-ui:latest \\
-                  bash integration-tests.sh'''
+                ansiColor('xterm') {
+                    sh '''echo "http-server --proxy-secure=false -P $CLUSTER_URL -p 4200 dist&" > integration-tests.sh
+                    echo "SERVER_PID=\\$!" >> integration-tests.sh
+                    echo "cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'" >> integration-tests.sh
+                    echo "kill \\$SERVER_PID" >> integration-tests.sh
+                    docker run -i --rm --ipc=host \\
+                      -v `pwd`:/dcos-ui \\
+                      mesosphere/dcos-ui:latest \\
+                      bash integration-tests.sh'''
+                }
             }
             post {
                 always {
@@ -90,12 +94,13 @@ pipeline {
 
                 // Run the `dcos-system-test-driver` locally, that will use
                 // the .systemtest-dev.sh bootstrap config
-                sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
-                docker run -i --rm --ipc=host \\
-                  -v `pwd`:/dcos-ui \\
-                  mesosphere/dcos-ui:latest \\
-                  dcos-system-test-driver -v ./.systemtest-dev.sh ${CLUSTER_URL}
-                '''
+                ansiColor('xterm') {
+                    sh '''docker run -i --rm --ipc=host \\
+                      -v `pwd`:/dcos-ui \\
+                      mesosphere/dcos-ui:latest \\
+                      dcos-system-test-driver -v ./.systemtest-dev.sh ${CLUSTER_URL}
+                    '''
+                }
             }
             post {
                 always {
@@ -112,8 +117,10 @@ pipeline {
                 echo 'Publishing to S3...'
                 unstash 'dist'
 
-                dir 'dist'
-                sh 'tar -zcf dcos-$(git rev-parse --short HEAD).tar.gz *'
+                ansiColor('xterm') {
+                    dir 'dist'
+                    sh 'tar -zcf dcos-$(git rev-parse --short HEAD).tar.gz *'
+                }
             }
             post {
                 success {
