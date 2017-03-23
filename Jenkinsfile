@@ -1,5 +1,7 @@
 @Library('sec_ci_libs') _
 
+def master_branches = ["ic/preview/jenkins-si", ] as String[]
+
 pipeline {
     agent {
         label 'infinity'
@@ -16,7 +18,8 @@ pipeline {
         //
         stage('Verify Author') {
             steps {
-                user_is_authorized(['ic/preview/jenkins-si',])
+                sh 'env'
+                user_is_authorized(master_branches)
             }
         }
 
@@ -46,37 +49,33 @@ pipeline {
         //
         stage('Lint, Unit Tests & Build') {
             steps {
-                parallel lint: {
-                    echo 'Running Lint...'
-                    ansiColor('xterm') {
+                ansiColor('xterm') {
+                    parallel lint: {
+                        echo 'Running Lint...'
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run lint
                         '''
-                    }
-                }, test: {
-                    echo 'Running Unit Tests...'
-                    ansiColor('xterm') {
+                    }, test: {
+                        echo 'Running Unit Tests...'
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run test
                         '''
-                    }
-                }, build: {
-                    echo 'Building DC/OS UI...'
-                    ansiColor('xterm') {
+                    }, build: {
+                        echo 'Building DC/OS UI...'
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run build-assets
                         '''
-                    }
-                }, failFast: true
+                    }, failFast: true
+                }
             }
             post {
                 always {
