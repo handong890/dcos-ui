@@ -36,7 +36,8 @@ pipeline {
                 ) {
                     echo 'Setting-up environment...'
                     sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
-                    docker pull mesosphere/dcos-ui:latest'''
+                    docker pull mesosphere/dcos-ui:latest
+                    ln -s /var/lib/node_modules node_modules'''
                 }
             }
         }
@@ -44,9 +45,29 @@ pipeline {
         //
         // Run unit tests & build the project
         //
-        stage('Unit Tests & Build') {
+        stage('Lint, Unit Tests & Build') {
             steps {
-                parallel build: {
+                parallel lint: {
+                    echo 'Running ESLint Tests...'
+                    ansiColor('xterm') {
+                        sh '''docker run -i --rm \\
+                          -v `pwd`:/dcos-ui:ro \\
+                          -e JENKINS_VERSION="yes" \\
+                          mesosphere/dcos-ui:latest \\
+                          npm run lint
+                        '''
+                    }
+                }, test: {
+                    echo 'Running Unit Tests...'
+                    ansiColor('xterm') {
+                        sh '''docker run -i --rm \\
+                          -v `pwd`:/dcos-ui:ro \\
+                          -e JENKINS_VERSION="yes" \\
+                          mesosphere/dcos-ui:latest \\
+                          npm run test
+                        '''
+                    }
+                }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
                         sh '''docker run -i --rm \\
@@ -54,26 +75,6 @@ pipeline {
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run build-assets
-                        '''
-                    }
-                }, test: {
-                    echo 'Running Unit Tests...'
-                    ansiColor('xterm') {
-                        sh '''docker run -i --rm \\
-                          -v `pwd`:/dcos-ui \\
-                          -e JENKINS_VERSION="yes" \\
-                          mesosphere/dcos-ui:latest \\
-                          npm run test
-                        '''
-                    }
-                }, lint: {
-                    echo 'Running ESLint Tests...'
-                    ansiColor('xterm') {
-                        sh '''docker run -i --rm \\
-                          -v `pwd`:/dcos-ui \\
-                          -e JENKINS_VERSION="yes" \\
-                          mesosphere/dcos-ui:latest \\
-                          npm run lint
                         '''
                     }
                 }, failFast: true
