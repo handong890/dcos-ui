@@ -15,7 +15,9 @@ pipeline {
         // Do not accept triggers from unauthorised sources
         //
         stage('Verify Author') {
-            user_is_authorized('')
+            steps {
+                user_is_authorized('ic/preview/jenkins-si')
+            }
         }
 
         //
