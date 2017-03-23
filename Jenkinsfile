@@ -1,6 +1,8 @@
 @Library('sec_ci_libs@ic/dcos-ui-flavor') _
 
-def master_branches = ["ic/preview/jenkins-si", ] as String[]
+def master_branches = ["master", "ic/preview/jenkins-si", ] as String[]
+def slackbot_token = '05dca2da-3e43-40fc-b5c0-504cc1783eee'
+def slackbot_channel = '#frontend-dev'
 
 pipeline {
     agent {
@@ -18,8 +20,11 @@ pipeline {
         //
         stage('Verify Author') {
             steps {
-                sh 'env'
-                user_is_authorized(master_branches, 'ce4865d2-26bd-4940-84e6-6eea2995273b', '#frontend-dev')
+                user_is_authorized(
+                    master_branches,
+                    slackbot_token,
+                    slackbot_channel
+                )
             }
         }
 
@@ -104,7 +109,7 @@ pipeline {
                 writeFile file: 'integration-tests.sh', text: [
                     'http-server -p 4200 dist&',
                     'SERVER_PID=$!',
-                    'cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'',
+                    'cypress run --reporter junit --reporter-options "mochaFile=cypress/results.xml"',
                     'kill $SERVER_PID'
                 ].join('\n')
 
