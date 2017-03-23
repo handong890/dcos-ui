@@ -1,4 +1,4 @@
-@Library('sec_ci_libs') _
+@Library('sec_ci_libs@ic/dcos-ui-flavor') _
 
 def master_branches = ["ic/preview/jenkins-si", ] as String[]
 
@@ -19,7 +19,7 @@ pipeline {
         stage('Verify Author') {
             steps {
                 sh 'env'
-                user_is_authorized(master_branches)
+                user_is_authorized(master_branches, 'ce4865d2-26bd-4940-84e6-6eea2995273b', '#frontend-dev')
             }
         }
 
