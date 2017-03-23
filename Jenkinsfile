@@ -35,7 +35,6 @@ pipeline {
                     ]
                 ) {
                     echo 'Setting-up environment...'
-                    deleteDir()
                     sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
                     docker pull mesosphere/dcos-ui:latest'''
                 }
