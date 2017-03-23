@@ -16,7 +16,7 @@ pipeline {
         //
         stage('Verify Author') {
             steps {
-                user_is_authorized(['ic/preview/jenkins-si'])
+                user_is_authorized(['ic/preview/jenkins-si',])
             }
         }
 
