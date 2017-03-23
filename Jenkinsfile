@@ -49,33 +49,37 @@ pipeline {
         //
         stage('Lint, Unit Tests & Build') {
             steps {
-                ansiColor('xterm') {
-                    parallel lint: {
-                        echo 'Running Lint...'
+                parallel lint: {
+                    echo 'Running Lint...'
+                    ansiColor('xterm') {
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run lint
                         '''
-                    }, test: {
-                        echo 'Running Unit Tests...'
+                    }
+                }, test: {
+                    echo 'Running Unit Tests...'
+                    ansiColor('xterm') {
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run test
                         '''
-                    }, build: {
-                        echo 'Building DC/OS UI...'
+                    }
+                }, build: {
+                    echo 'Building DC/OS UI...'
+                    ansiColor('xterm') {
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run build-assets
                         '''
-                    }, failFast: true
-                }
+                    }
+                }, failFast: true
             }
             post {
                 always {
