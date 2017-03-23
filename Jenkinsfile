@@ -36,8 +36,7 @@ pipeline {
                 ) {
                     echo 'Setting-up environment...'
                     sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
-                    docker pull mesosphere/dcos-ui:latest
-                    ln -s /var/lib/node_modules node_modules'''
+                    docker pull mesosphere/dcos-ui:latest'''
                 }
             }
         }
@@ -48,10 +47,10 @@ pipeline {
         stage('Lint, Unit Tests & Build') {
             steps {
                 parallel lint: {
-                    echo 'Running ESLint Tests...'
+                    echo 'Running Lint...'
                     ansiColor('xterm') {
                         sh '''docker run -i --rm \\
-                          -v `pwd`:/dcos-ui:ro \\
+                          -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run lint
@@ -61,7 +60,7 @@ pipeline {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
                         sh '''docker run -i --rm \\
-                          -v `pwd`:/dcos-ui:ro \\
+                          -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
                           npm run test
