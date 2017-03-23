@@ -1,4 +1,4 @@
-// @Library('sec_ci_libs') _
+@Library('sec_ci_libs') _
 
 pipeline {
     agent {
@@ -11,14 +11,14 @@ pipeline {
 
     stages {
 
-        // //
-        // // Do not accept triggers from unauthorised sources
-        // //
-        // stage('Verify Author') {
-        //     steps {
-        //         user_is_authorized('ic/preview/jenkins-si')
-        //     }
-        // }
+        //
+        // Do not accept triggers from unauthorised sources
+        //
+        stage('Verify Author') {
+            steps {
+                user_is_authorized(['ic/preview/jenkins-si'])
+            }
+        }
 
         //
         // During the initialize step we prepare the environment so we
