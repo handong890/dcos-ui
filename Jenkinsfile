@@ -63,6 +63,7 @@ pipeline {
                 }, test: {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
+                        sleep time: 2, unit: SECONDS
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
@@ -73,6 +74,7 @@ pipeline {
                 }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
+                        sleep time: 2, unit: SECONDS
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
