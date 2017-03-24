@@ -40,7 +40,12 @@ pipeline {
                 ) {
                     echo 'Setting-up environment...'
                     sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
-                    docker pull mesosphere/dcos-ui:latest'''
+                    docker pull mesosphere/dcos-ui:latest
+                    docker run -i --rm \\
+                          -v `pwd`:/dcos-ui \\
+                          -e JENKINS_VERSION="yes" \\
+                          mesosphere/dcos-ui:latest \\
+                          npm run scaffold'''
                 }
             }
         }
@@ -63,7 +68,6 @@ pipeline {
                 }, test: {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
-                        sleep time: 2, unit: SECONDS
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
@@ -74,7 +78,6 @@ pipeline {
                 }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
-                        sleep time: 2, unit: SECONDS
                         sh '''docker run -i --rm \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
