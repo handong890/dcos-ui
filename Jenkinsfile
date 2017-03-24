@@ -128,7 +128,7 @@ pipeline {
             }
             post {
                 always {
-                    junit 'cypress/results.xml'
+                    junit 'cypress/*.xml'
                 }
             }
         }
