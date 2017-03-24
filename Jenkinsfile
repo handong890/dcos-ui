@@ -42,10 +42,11 @@ pipeline {
                     sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
                     docker pull mesosphere/dcos-ui:latest
                     docker run -i --rm \\
-                          -v `pwd`:/dcos-ui \\
-                          -e JENKINS_VERSION="yes" \\
-                          mesosphere/dcos-ui:latest \\
-                          npm run scaffold'''
+                      --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
+                      -v `pwd`:/dcos-ui \\
+                      -e JENKINS_VERSION="yes" \\
+                      mesosphere/dcos-ui:latest \\
+                      npm run scaffold'''
                 }
             }
         }
@@ -59,6 +60,7 @@ pipeline {
                     echo 'Running Lint...'
                     ansiColor('xterm') {
                         sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
@@ -69,6 +71,7 @@ pipeline {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
                         sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
@@ -79,6 +82,7 @@ pipeline {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
                         sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
                           -v `pwd`:/dcos-ui \\
                           -e JENKINS_VERSION="yes" \\
                           mesosphere/dcos-ui:latest \\
@@ -115,7 +119,8 @@ pipeline {
                 ].join('\n')
 
                 ansiColor('xterm') {
-                    sh '''docker run -i --rm --ipc=host \\
+                    sh '''docker run -i --rm \\
+                      --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
                       -v `pwd`:/dcos-ui \\
                       mesosphere/dcos-ui:latest \\
                       bash integration-tests.sh'''
@@ -148,7 +153,8 @@ pipeline {
                     // the .systemtest-dev.sh bootstrap config and provision a
                     // cluster for the test.
                     ansiColor('xterm') {
-                        sh '''docker run -i --rm --ipc=host \\
+                        sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
                           -v `pwd`:/dcos-ui \\
                           -e CCM_AUTH_TOKEN=${CCM_AUTH_TOKEN} \\
                           mesosphere/dcos-ui:latest \\
@@ -173,7 +179,7 @@ pipeline {
                 unstash 'dist'
 
                 ansiColor('xterm') {
-                    sh 'cd dist; tar -zcf dcos-$(git rev-parse --short HEAD).tar.gz *'
+                    sh 'cd dist; tar -zcf dcos-open-$(git rev-parse --short HEAD).tar.gz *'
                 }
 
                 // Upload artifact on the S3 bucket for the DC/OS UI
