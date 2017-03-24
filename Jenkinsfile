@@ -98,6 +98,9 @@ pipeline {
                 success {
                     stash includes: 'dist/*', name: 'dist'
                 }
+                failure {
+                    archiveArtifacts 'npm-debug.log'
+                }
             }
         }
 
@@ -128,6 +131,9 @@ pipeline {
             }
             post {
                 always {
+                    archiveArtifacts 'cypress/**/*'
+                }
+                success {
                     junit 'cypress/*.xml'
                 }
             }
