@@ -3,48 +3,63 @@
 # This is a configuration script to the system-test-driver that runs the
 # integration tests against the development version of the DC/OS UI
 #
-
-# Require a cluster to be specified from the command-line
-CLUSTER_URL="$1"
-CLUSTER_AUTH_SCRIPT="$2"
-LOCAL_PORT=8050
-
-# Validate
-if [ -z "$CLUSTER_URL" ]; then
-  echo "Please specify the cluster URL to use"
-  exit 1
-fi
-
-# Start an http proxy that will serve the built version of the DC/OS UI
-# against the cluster specified.
 cat <<EOF
-{
-  "criteria": [],
+criteria: []
+suites:
+  - file:.
 
-  "suites": [
-    "file:."
-  ],
-
-  "scripts": {
-    "daemon": "http-server -p $LOCAL_PORT -P $CLUSTER_URL dist"
-  },
-
-  "targets": [
-    {
-      "name": "ee",
-      "title": "Enterprise Version",
-      "features": [
-        "secrets",
-        "enterprise"
-      ],
-      "type": "static",
-      "config": {
-        "url": "http://127.0.0.1:$LOCAL_PORT"
-      },
-      "scripts": {
-        "auth": "./system-tests/_scripts/auth-open.py"
-      }
-    }
-  ]
-}
+targets:
 EOF
+
+#
+# If the user hasn't provided a cluster, provision one through CCM
+# Note than when this approach is used, you *must* also specify the CCM
+# authentication token as the CCM_AUTH_TOKEN environment variable
+#
+if [ -z "$1" ]; then
+
+  # Ensure CCM_AUTH_TOKEN is specified
+  if [ -z "$CCM_AUTH_TOKEN" ]; then
+    echo "Error: Please specify the CCM_AUTH_TOKEN environment variable"
+    exit 1
+  fi
+
+cat <<EOF
+  - name: open
+    title: Open Version
+    features: []
+
+    type: ccm
+    config:
+      template: single-master.cloudformation.json
+
+    env:
+      PROXIED_CLUSTER_URL: http://127.0.0.1:4201
+
+    scripts:
+      proxy: http-server -p 4201 -P \$CLUSTER_URL dist
+      auth: ./system-tests/_scripts/auth-open.py
+
+secrets:
+  ccm_auth_token: $CCM_AUTH_TOKEN
+EOF
+
+# Otherwise, use the static URL from the user argument
+else
+cat <<EOF
+  - name: open
+    title: Open Version
+    features: []
+
+    type: static
+    config:
+      url: $1
+
+    env:
+      PROXIED_CLUSTER_URL: http://127.0.0.1:4201
+
+    scripts:
+      proxy: http-server -p 4201 -P \$CLUSTER_URL dist
+      auth: ./system-tests/_scripts/auth-open.py
+EOF
+fi

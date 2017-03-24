@@ -9,10 +9,6 @@ pipeline {
         label 'infinity'
     }
 
-    environment {
-        CLUSTER_URL = 'http://icharalam-elasticl-atm3p900pucm-796070874.us-west-2.elb.amazonaws.com'
-    }
-
     stages {
 
         //
@@ -132,17 +128,28 @@ pipeline {
         //
         stage('System Tests') {
             steps {
-                echo 'Running integration tests..'
-                unstash 'dist'
+                withCredentials(
+                    [
+                        string(
+                            credentialsId: '8e2b2400-0f14-4e4d-b319-e1360f97627d',
+                            variable: 'CCM_AUTH_TOKEN'
+                        )
+                    ]
+                ) {
+                    echo 'Running integration tests..'
+                    unstash 'dist'
 
-                // Run the `dcos-system-test-driver` locally, that will use
-                // the .systemtest-dev.sh bootstrap config
-                ansiColor('xterm') {
-                    sh '''docker run -i --rm --ipc=host \\
-                      -v `pwd`:/dcos-ui \\
-                      mesosphere/dcos-ui:latest \\
-                      dcos-system-test-driver -v ./.systemtest-dev.sh ${CLUSTER_URL}
-                    '''
+                    // Run the `dcos-system-test-driver` locally, that will use
+                    // the .systemtest-dev.sh bootstrap config and provision a
+                    // cluster for the test.
+                    ansiColor('xterm') {
+                        sh '''docker run -i --rm --ipc=host \\
+                          -v `pwd`:/dcos-ui \\
+                          -e CCM_AUTH_TOKEN=${CCM_AUTH_TOKEN} \\
+                          mesosphere/dcos-ui:latest \\
+                          dcos-system-test-driver -v ./.systemtest-dev.sh
+                        '''
+                    }
                 }
             }
             post {
