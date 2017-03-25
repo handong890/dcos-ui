@@ -43,7 +43,7 @@ pipeline {
                     ]
                 ) {
                     echo 'Setting-up environment...'
-                    sh '''npm run scaffold'''
+                    sh '''env && pwd && npm run scaffold'''
                 }
             }
         }
