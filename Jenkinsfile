@@ -6,11 +6,7 @@ def slackbot_channel = '#frontend-dev'
 
 pipeline {
     agent {
-        docker {
-            image 'mesosphere/dcos-ui:latest'
-            label 'infinity'
-            args  '--cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host'
-        }
+        label 'infinity'
     }
 
     stages {
@@ -43,7 +39,14 @@ pipeline {
                     ]
                 ) {
                     echo 'Setting-up environment...'
-                    sh '''npm run scaffold'''
+                    sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
+                    docker pull mesosphere/dcos-ui:latest
+                    docker run -i --rm \\
+                      --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
+                      -v `pwd`:/dcos-ui \\
+                      -e JENKINS_VERSION="yes" \\
+                      mesosphere/dcos-ui:latest \\
+                      npm run scaffold'''
                 }
             }
         }
@@ -56,17 +59,35 @@ pipeline {
                 parallel lint: {
                     echo 'Running Lint...'
                     ansiColor('xterm') {
-                        sh '''npm run lint'''
+                        sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
+                          -v `pwd`:/dcos-ui \\
+                          -e JENKINS_VERSION="yes" \\
+                          mesosphere/dcos-ui:latest \\
+                          npm run lint
+                        '''
                     }
                 }, test: {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
-                        sh '''npm run test'''
+                        sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
+                          -v `pwd`:/dcos-ui \\
+                          -e JENKINS_VERSION="yes" \\
+                          mesosphere/dcos-ui:latest \\
+                          npm run test
+                        '''
                     }
                 }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
-                        sh '''npm run build-assets'''
+                        sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
+                          -v `pwd`:/dcos-ui \\
+                          -e JENKINS_VERSION="yes" \\
+                          mesosphere/dcos-ui:latest \\
+                          npm run build-assets
+                        '''
                     }
                 }, failFast: true
             }
@@ -101,7 +122,21 @@ pipeline {
                 ].join('\n')
 
                 ansiColor('xterm') {
-                    sh '''bash integration-tests.sh'''
+                    script {
+                        def tries = 3
+                        while (tries > 0) {
+                            def ret = sh '''docker run -i --rm \\
+                              --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
+                              -v `pwd`:/dcos-ui \\
+                              mesosphere/dcos-ui:latest \\
+                              bash integration-tests.sh''', returnStatus: true
+                            if (ret == 0) {
+                                break
+                            }
+                        }
+                        throw new Exception("Aborting after 3 attempts")
+                    }
+
                 }
             }
             post {
@@ -134,7 +169,13 @@ pipeline {
                     // the .systemtest-dev.sh bootstrap config and provision a
                     // cluster for the test.
                     ansiColor('xterm') {
-                        sh '''dcos-system-test-driver -v ./.systemtest-dev.sh'''
+                        sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
+                          -v `pwd`:/dcos-ui \\
+                          -e CCM_AUTH_TOKEN=${CCM_AUTH_TOKEN} \\
+                          mesosphere/dcos-ui:latest \\
+                          dcos-system-test-driver -v ./.systemtest-dev.sh
+                        '''
                     }
                 }
             }
