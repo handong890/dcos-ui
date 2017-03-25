@@ -9,7 +9,7 @@ pipeline {
         docker {
             image 'mesosphere/dcos-ui:latest'
             label 'infinity'
-            args  '-v ${WORKSPACE}:/dcos-ui --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host'
+            args  '-v --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host'
         }
     }
 
@@ -43,7 +43,7 @@ pipeline {
                     ]
                 ) {
                     echo 'Setting-up environment...'
-                    sh '''ln -s /var/lib/node_modules node_modules && npm run scaffold'''
+                    sh '''cp -R /var/lib/node_modules node_modules && npm run scaffold'''
                 }
             }
         }
