@@ -122,21 +122,13 @@ pipeline {
                 ].join('\n')
 
                 ansiColor('xterm') {
-                    script {
-                        def tries = 3
-                        while (tries > 0) {
-                            def ret = sh '''docker run -i --rm \\
-                              --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
-                              -v `pwd`:/dcos-ui \\
-                              mesosphere/dcos-ui:latest \\
-                              bash integration-tests.sh''', returnStatus: true
-                            if (ret == 0) {
-                                break
-                            }
-                        }
-                        throw new Exception("Aborting after 3 attempts")
+                    retry (3) {
+                        sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
+                          -v `pwd`:/dcos-ui \\
+                          mesosphere/dcos-ui:latest \\
+                          bash integration-tests.sh'''
                     }
-
                 }
             }
             post {
