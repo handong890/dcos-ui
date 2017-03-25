@@ -9,7 +9,7 @@ pipeline {
         docker {
             image 'mesosphere/dcos-ui:latest'
             label 'infinity'
-            args  '--cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host'
+            args  '-v `pwd:/dcos-ui --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host'
         }
     }
 
