@@ -42,7 +42,9 @@ pipeline {
                     sh '''npm install
                     npm run scaffold
                     npm install http-server
-                    cypress update'''
+                    cypress update
+                    apt-get update
+                    apt-get install python3'''
                 }
             }
         }
@@ -93,9 +95,8 @@ pipeline {
                 // Run a simple webserver serving the dist folder statically
                 // before we run the cypress tests
                 writeFile file: 'integration-tests.sh', text: [
-                    'http-server -p 4200 dist&',
+                    './node_modules/.bin/http-server -p 4200 dist&',
                     'SERVER_PID=$!',
-                    'export JENKINS_VERSION=yes',
                     'cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'',
                     'RET=$?',
                     'kill $SERVER_PID',
