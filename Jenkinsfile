@@ -45,7 +45,7 @@ pipeline {
                         npm install cypress-cli git://github.com/johntron/http-server.git#proxy-secure-flag
                         ./node_modules/.bin/cypress update
                         apt-get update
-                        apt-get install -y python3 python3-setuptools'''
+                        apt-get install -y python3 python3-setuptools python3-dev'''
                 }
             }
         }
