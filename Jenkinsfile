@@ -44,7 +44,7 @@ pipeline {
                     npm install http-server
                     cypress update
                     apt-get update
-                    apt-get install python3'''
+                    apt-get install -y python3'''
                 }
             }
         }
