@@ -40,14 +40,23 @@ pipeline {
                 ) {
                     ansiColor('xterm') {
                         echo 'Setting-up environment...'
-                        sh '''bash ./scripts/pre-install
-                            npm install
-                            npm run scaffold
-                            npm install cypress-cli git://github.com/johntron/http-server.git#proxy-secure-flag
-                            ./node_modules/.bin/cypress update
-                            apt-get update
+
+                        // Install core things that won't fail
+                        sh '''apt-get update
                             apt-get install -y python3 python3-setuptools python3-dev python3-pip
-                            pip install virtualenv'''
+                            pip install virtualenv
+                            bash ./scripts/pre-install'''
+
+                        // Install might fail with 'unexpected eof'
+                        retry (2) {
+                            sh '''npm install'''
+                        }
+
+                        // Install npm dependencies
+                        sh '''npm run scaffold
+                            npm install cypress-cli git://github.com/johntron/http-server.git#proxy-secure-flag
+                            ./node_modules/.bin/cypress update'''
+
                     }
                 }
             }
