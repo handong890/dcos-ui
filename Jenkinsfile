@@ -39,12 +39,13 @@ pipeline {
                     ]
                 ) {
                     echo 'Setting-up environment...'
-                    sh '''npm install
-                    npm run scaffold
-                    npm install http-server cypress-cli
-                    ./node_modules/.bin/cypress update
-                    apt-get update
-                    apt-get install -y python3'''
+                    sh '''bash ./scripts/pre-install
+                        npm install
+                        npm run scaffold
+                        npm install cypress-cli git://github.com/johntron/http-server.git#proxy-secure-flag
+                        ./node_modules/.bin/cypress update
+                        apt-get update
+                        apt-get install -y python3'''
                 }
             }
         }
@@ -54,16 +55,16 @@ pipeline {
         //
         stage('Lint, Unit Tests & Build') {
             steps {
-                parallel lint: {
-                    echo 'Running Lint...'
-                    ansiColor('xterm') {
-                        sh '''JENKINS_VERSION=yes npm run lint'''
-                    }
-                }, test: {
-                    echo 'Running Unit Tests...'
-                    ansiColor('xterm') {
-                        sh '''JENKINS_VERSION=yes npm run test'''
-                    }
+                // parallel lint: {
+                //     echo 'Running Lint...'
+                //     ansiColor('xterm') {
+                //         sh '''JENKINS_VERSION=yes npm run lint'''
+                //     }
+                // }, test: {
+                //     echo 'Running Unit Tests...'
+                //     ansiColor('xterm') {
+                //         sh '''JENKINS_VERSION=yes npm run test'''
+                //     }
                 }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
