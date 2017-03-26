@@ -65,12 +65,12 @@ pipeline {
                 //     ansiColor('xterm') {
                 //         sh '''JENKINS_VERSION=yes npm run test'''
                 //     }
-                }, build: {
-                    echo 'Building DC/OS UI...'
-                    ansiColor('xterm') {
-                        sh '''JENKINS_VERSION=yes npm run build-assets'''
-                    }
-                }, failFast: true
+                // }, build: {
+                echo 'Building DC/OS UI...'
+                ansiColor('xterm') {
+                    sh '''JENKINS_VERSION=yes npm run build-assets'''
+                }
+                // }, failFast: true
             }
             post {
                 always {
