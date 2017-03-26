@@ -42,7 +42,8 @@ pipeline {
                     sh '''npm install
                     npm run scaffold
                     npm install -g http-server
-                    npm update -g cypress-cli
+                    rm -rf /usr/local/lib/node_modules/cypress-cli
+                    npm install -g cypress-cli
                     cypress update
                     apt-get update
                     apt-get install -y python3'''
