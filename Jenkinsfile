@@ -41,7 +41,8 @@ pipeline {
                     echo 'Setting-up environment...'
                     sh '''npm install
                     npm run scaffold
-                    npm install -g http-server cypress-cli
+                    npm install -g http-server
+                    npm update -g cypress-cli
                     cypress update
                     apt-get update
                     apt-get install -y python3'''
