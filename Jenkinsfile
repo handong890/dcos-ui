@@ -142,9 +142,10 @@ pipeline {
                     unstash 'dist'
 
                     // Install system-test-driver
-                    sh '''[ ! -d dcos-system-test-driver ] && \\
-                        git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver && \\
-                        (cd dcos-system-test-driver; python3 setup.py install)'''
+                    sh '''git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver \\
+                        cd dcos-system-test-driver \\
+                        python3 setup.py install \\
+                        cd ..'''
 
                     // Run the `dcos-system-test-driver` locally, that will use
                     // the .systemtest-dev.sh bootstrap config and provision a
