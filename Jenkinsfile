@@ -43,8 +43,7 @@ pipeline {
 
                         // Install core things that won't fail
                         sh '''apt-get update
-                            apt-get install -y python3 python3-setuptools python3-dev python3-pip
-                            pip3 install virtualenv
+                            apt-get install -y python3 python3-setuptools python3-dev python3-pip python3-virtualenv
                             bash ./scripts/pre-install'''
 
                         // Install might fail with 'unexpected eof'
