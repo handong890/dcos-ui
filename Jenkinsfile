@@ -100,7 +100,11 @@ pipeline {
 
                 ansiColor('xterm') {
                     retry (3) {
-                        sh '''bash integration-tests.sh'''
+                        sh '''docker run -i --rm \\
+                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
+                          -v `pwd`:/dcos-ui \\
+                          mesosphere/dcos-ui:latest \\
+                          bash integration-tests.sh'''
                     }
                 }
             }
