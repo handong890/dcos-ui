@@ -95,10 +95,10 @@ pipeline {
                 // Run a simple webserver serving the dist folder statically
                 // before we run the cypress tests
                 writeFile file: 'integration-tests.sh', text: [
-                    'export PATH=$PATH:`pwd`/node_modules/.bin',
+                    'export PATH=`pwd`/node_modules/.bin:$PATH',
                     'http-server -p 4200 dist&',
                     'SERVER_PID=$!',
-                    'cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'',
+                    'cypress run --reporter junit --reporter-options \"mochaFile=cypress/results.xml\"',
                     'RET=$?',
                     'kill $SERVER_PID',
                     'exit $RET'
@@ -148,7 +148,7 @@ pipeline {
                             sh '''git clone -f https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver
                               cd dcos-system-test-driver
                               python setup.py install
-                              export PATH=$PATH:`pwd`/node_modules/.bin dcos-system-test-driver -v ./.systemtest-dev.sh'''
+                              export PATH=`pwd`/node_modules/.bin:$PATH dcos-system-test-driver -v ./.systemtest-dev.sh'''
                         }
                     }
                 }
