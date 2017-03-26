@@ -141,22 +141,22 @@ pipeline {
                     echo 'Running integration tests..'
                     unstash 'dist'
 
+                    // Install system-test-driver
+                    sh '''[ ! -d dcos-system-test-driver ] && \\
+                        git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver \\
+                        (cd dcos-system-test-driver; python3 setup.py install)'''
+
                     // Run the `dcos-system-test-driver` locally, that will use
                     // the .systemtest-dev.sh bootstrap config and provision a
                     // cluster for the test.
                     ansiColor('xterm') {
-                        retry (2) {
-                            sh '''[ ! -d dcos-system-test-driver ] && git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver
-                              cd dcos-system-test-driver
-                              python3 setup.py install
-                              cd ..
-                              PATH=`pwd`/node_modules/.bin:$PATH dcos-system-test-driver -v ./.systemtest-dev.sh'''
-                        }
+                        sh '''PATH=`pwd`/node_modules/.bin:$PATH dcos-system-test-driver -v ./.systemtest-dev.sh'''
                     }
                 }
             }
             post {
-                success {
+                always {
+                    archiveArtifacts 'results/**/*'
                     junit 'results/results.xml'
                 }
             }

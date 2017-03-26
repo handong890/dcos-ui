@@ -38,7 +38,7 @@ cat <<EOF
 
     scripts:
       proxy: http-server --proxy-secure=false -p 4201 -P \$CLUSTER_URL dist
-      auth: python system-tests/_scripts/auth-open.py
+      auth: /usr/local/bin/python3 system-tests/_scripts/auth-open.py
 
 secrets:
   ccm_auth_token: $CCM_AUTH_TOKEN
@@ -60,6 +60,6 @@ cat <<EOF
 
     scripts:
       proxy: http-server --proxy-secure=false -p 4201 -P \$CLUSTER_URL dist
-      auth: python system-tests/_scripts/auth-open.py
+      auth: /usr/local/bin/python3 system-tests/_scripts/auth-open.py
 EOF
 fi
