@@ -52,17 +52,17 @@ pipeline {
                 parallel lint: {
                     echo 'Running Lint...'
                     ansiColor('xterm') {
-                        sh '''npm run lint'''
+                        sh '''JENKINS_VERSION=yes npm run lint'''
                     }
                 }, test: {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
-                        sh '''npm run test'''
+                        sh '''JENKINS_VERSION=yes npm run test'''
                     }
                 }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
-                        sh '''npm run build-assets'''
+                        sh '''JENKINS_VERSION=yes npm run build-assets'''
                     }
                 }, failFast: true
             }
@@ -92,6 +92,7 @@ pipeline {
                 writeFile file: 'integration-tests.sh', text: [
                     'http-server -p 4200 dist&',
                     'SERVER_PID=$!',
+                    'export JENKINS_VERSION=yes',
                     'cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'',
                     'RET=$?',
                     'kill $SERVER_PID',
