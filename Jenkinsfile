@@ -6,7 +6,7 @@ def slackbot_channel = '#frontend-dev'
 
 pipeline {
     agent {
-        label 'infinity'
+        label 'cypress'
     }
 
     stages {
@@ -39,14 +39,7 @@ pipeline {
                     ]
                 ) {
                     echo 'Setting-up environment...'
-                    sh '''docker login -u "$DH_USERNAME" -p "$DH_PASSWORD"
-                    docker pull mesosphere/dcos-ui:latest
-                    docker run -i --rm \\
-                      --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
-                      -v `pwd`:/dcos-ui \\
-                      -e JENKINS_VERSION="yes" \\
-                      mesosphere/dcos-ui:latest \\
-                      npm run scaffold'''
+                    sh '''npm install && npm run scaffold'''
                 }
             }
         }
@@ -59,32 +52,17 @@ pipeline {
                 parallel lint: {
                     echo 'Running Lint...'
                     ansiColor('xterm') {
-                        sh '''docker run -i --rm \\
-                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
-                          -v `pwd`:/dcos-ui \\
-                          -e JENKINS_VERSION="yes" \\
-                          mesosphere/dcos-ui:latest \\
-                          npm run lint'''
+                        sh '''npm run lint'''
                     }
                 }, test: {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
-                        sh '''docker run -i --rm \\
-                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
-                          -v `pwd`:/dcos-ui \\
-                          -e JENKINS_VERSION="yes" \\
-                          mesosphere/dcos-ui:latest \\
-                          npm run test'''
+                        sh '''npm run test'''
                     }
                 }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
-                        sh '''docker run -i --rm \\
-                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined \\
-                          -v `pwd`:/dcos-ui \\
-                          -e JENKINS_VERSION="yes" \\
-                          mesosphere/dcos-ui:latest \\
-                          npm run build-assets'''
+                        sh '''npm run build-assets'''
                     }
                 }, failFast: true
             }
@@ -122,11 +100,7 @@ pipeline {
 
                 ansiColor('xterm') {
                     retry (3) {
-                        sh '''docker run -i --rm \\
-                          --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
-                          -v `pwd`:/dcos-ui \\
-                          mesosphere/dcos-ui:latest \\
-                          bash integration-tests.sh'''
+                        sh '''bash integration-tests.sh'''
                     }
                 }
             }
@@ -150,6 +124,10 @@ pipeline {
                         string(
                             credentialsId: '8e2b2400-0f14-4e4d-b319-e1360f97627d',
                             variable: 'CCM_AUTH_TOKEN'
+                        ),
+                        string(
+                            credentialsId: 'd146870f-03b0-4f6a-ab70-1d09757a51fc',
+                            variable: 'GITHUB_TOKEN'
                         )
                     ]
                 ) {
@@ -161,11 +139,9 @@ pipeline {
                     // cluster for the test.
                     ansiColor('xterm') {
                         retry (2) {
-                            sh '''docker run -i --rm \\
-                              --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --ipc=host \\
-                              -v `pwd`:/dcos-ui \\
-                              -e CCM_AUTH_TOKEN=${CCM_AUTH_TOKEN} \\
-                              mesosphere/dcos-ui:latest \\
+                            sh '''git clone -f https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver
+                              cd dcos-system-test-driver
+                              python setup.py install
                               dcos-system-test-driver -v ./.systemtest-dev.sh'''
                         }
                     }
