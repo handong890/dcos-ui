@@ -101,7 +101,7 @@ pipeline {
 
                 ansiColor('xterm') {
                     retry (3) {
-                        sh '''integration-tests.sh'''
+                        sh '''bash integration-tests.sh'''
                     }
                 }
             }
