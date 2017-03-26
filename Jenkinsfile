@@ -55,27 +55,27 @@ pipeline {
         //
         stage('Lint, Unit Tests & Build') {
             steps {
-                // parallel lint: {
-                //     echo 'Running Lint...'
-                //     ansiColor('xterm') {
-                //         sh '''JENKINS_VERSION=yes npm run lint'''
-                //     }
-                // }, test: {
-                //     echo 'Running Unit Tests...'
-                //     ansiColor('xterm') {
-                //         sh '''JENKINS_VERSION=yes npm run test'''
-                //     }
-                // }, build: {
-                echo 'Building DC/OS UI...'
-                ansiColor('xterm') {
-                    sh '''JENKINS_VERSION=yes npm run build-assets'''
-                }
-                // }, failFast: true
+                parallel lint: {
+                    echo 'Running Lint...'
+                    ansiColor('xterm') {
+                        sh '''JENKINS_VERSION=yes npm run lint'''
+                    }
+                }, test: {
+                    echo 'Running Unit Tests...'
+                    ansiColor('xterm') {
+                        sh '''JENKINS_VERSION=yes npm run test'''
+                    }
+                }, build: {
+                    echo 'Building DC/OS UI...'
+                    ansiColor('xterm') {
+                        sh '''JENKINS_VERSION=yes npm run build-assets'''
+                    }
+                }, failFast: true
             }
             post {
-                // always {
-                //     junit 'jest/test-results/*.xml'
-                // }
+                always {
+                    junit 'jest/test-results/*.xml'
+                }
                 success {
                     stash includes: 'dist/*', name: 'dist'
                 }
@@ -88,38 +88,38 @@ pipeline {
         //
         // Run integration tests
         //
-        // stage('Integration Tests') {
-        //     steps {
-        //         echo 'Running Integration Tests...'
-        //         unstash 'dist'
+        stage('Integration Tests') {
+            steps {
+                echo 'Running Integration Tests...'
+                unstash 'dist'
 
-        //         // Run a simple webserver serving the dist folder statically
-        //         // before we run the cypress tests
-        //         writeFile file: 'integration-tests.sh', text: [
-        //             'export PATH=`pwd`/node_modules/.bin:$PATH',
-        //             'http-server -p 4200 dist&',
-        //             'SERVER_PID=$!',
-        //             'cypress run --reporter junit --reporter-options \"mochaFile=cypress/results.xml\"',
-        //             'RET=$?',
-        //             'kill $SERVER_PID',
-        //             'exit $RET'
-        //         ].join('\n')
+                // Run a simple webserver serving the dist folder statically
+                // before we run the cypress tests
+                writeFile file: 'integration-tests.sh', text: [
+                    'export PATH=`pwd`/node_modules/.bin:$PATH',
+                    'http-server -p 4200 dist&',
+                    'SERVER_PID=$!',
+                    'cypress run --reporter junit --reporter-options \"mochaFile=cypress/results.xml\"',
+                    'RET=$?',
+                    'kill $SERVER_PID',
+                    'exit $RET'
+                ].join('\n')
 
-        //         ansiColor('xterm') {
-        //             retry (3) {
-        //                 sh '''bash integration-tests.sh'''
-        //             }
-        //         }
-        //     }
-        //     post {
-        //         always {
-        //             archiveArtifacts 'cypress/**/*'
-        //         }
-        //         success {
-        //             junit 'cypress/*.xml'
-        //         }
-        //     }
-        // }
+                ansiColor('xterm') {
+                    retry (3) {
+                        sh '''bash integration-tests.sh'''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts 'cypress/**/*'
+                }
+                success {
+                    junit 'cypress/*.xml'
+                }
+            }
+        }
 
         //
         // Run system integration tests
@@ -142,9 +142,9 @@ pipeline {
                     unstash 'dist'
 
                     // Install system-test-driver
-                    sh '''git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver \\
-                        cd dcos-system-test-driver \\
-                        python3 setup.py install \\
+                    sh '''git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver
+                        cd dcos-system-test-driver
+                        python3 setup.py install
                         cd ..'''
 
                     // Run the `dcos-system-test-driver` locally, that will use
