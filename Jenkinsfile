@@ -41,10 +41,8 @@ pipeline {
                     echo 'Setting-up environment...'
                     sh '''npm install
                     npm run scaffold
-                    npm install -g http-server
-                    sudo rm -rf /usr/local/lib/node_modules/cypress-cli
-                    npm install -g cypress-cli
-                    cypress update
+                    npm install http-server cypress-cli
+                    ./node_modules/.bin/cypress update
                     apt-get update
                     apt-get install -y python3'''
                 }
@@ -97,6 +95,7 @@ pipeline {
                 // Run a simple webserver serving the dist folder statically
                 // before we run the cypress tests
                 writeFile file: 'integration-tests.sh', text: [
+                    'export PATH=$PATH:`pwd`/node_modules/.bin'
                     'http-server -p 4200 dist&',
                     'SERVER_PID=$!',
                     'cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'',
@@ -149,7 +148,7 @@ pipeline {
                             sh '''git clone -f https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver
                               cd dcos-system-test-driver
                               python setup.py install
-                              dcos-system-test-driver -v ./.systemtest-dev.sh'''
+                              export PATH=$PATH:`pwd`/node_modules/.bin dcos-system-test-driver -v ./.systemtest-dev.sh'''
                         }
                     }
                 }
