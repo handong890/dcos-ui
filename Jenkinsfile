@@ -149,6 +149,7 @@ pipeline {
                             sh '''[ ! -d dcos-system-test-driver ] && git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver
                               cd dcos-system-test-driver
                               python3 setup.py install
+                              cd ..
                               PATH=`pwd`/node_modules/.bin:$PATH dcos-system-test-driver -v ./.systemtest-dev.sh'''
                         }
                     }
