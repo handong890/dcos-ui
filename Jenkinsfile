@@ -38,14 +38,16 @@ pipeline {
                         )
                     ]
                 ) {
-                    echo 'Setting-up environment...'
-                    sh '''bash ./scripts/pre-install
-                        npm install
-                        npm run scaffold
-                        npm install cypress-cli git://github.com/johntron/http-server.git#proxy-secure-flag
-                        ./node_modules/.bin/cypress update
-                        apt-get update
-                        apt-get install -y python3 python3-setuptools python3-dev'''
+                    ansiColor('xterm') {
+                        echo 'Setting-up environment...'
+                        sh '''bash ./scripts/pre-install
+                            npm install
+                            npm run scaffold
+                            npm install cypress-cli git://github.com/johntron/http-server.git#proxy-secure-flag
+                            ./node_modules/.bin/cypress update
+                            apt-get update
+                            apt-get install -y python3 python3-setuptools python3-dev'''
+                    }
                 }
             }
         }
