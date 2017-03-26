@@ -14,7 +14,7 @@ cat <<EOF
 isolation:
   type: shell
   shell:
-    wrapper: (source .env/bin/activate; {})
+    wrapper: (. .env/bin/activate; {})
   scripts:
     setup: ./_scripts/setup.sh
   files:
