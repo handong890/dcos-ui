@@ -39,7 +39,10 @@ pipeline {
                     ]
                 ) {
                     echo 'Setting-up environment...'
-                    sh '''npm install && npm run scaffold'''
+                    sh '''npm install
+                    npm run scaffold
+                    npm install http-server
+                    cypress update'''
                 }
             }
         }
