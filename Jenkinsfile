@@ -73,9 +73,9 @@ pipeline {
                 // }, failFast: true
             }
             post {
-                always {
-                    junit 'jest/test-results/*.xml'
-                }
+                // always {
+                //     junit 'jest/test-results/*.xml'
+                // }
                 success {
                     stash includes: 'dist/*', name: 'dist'
                 }
