@@ -95,7 +95,7 @@ pipeline {
                 // Run a simple webserver serving the dist folder statically
                 // before we run the cypress tests
                 writeFile file: 'integration-tests.sh', text: [
-                    'export PATH=$PATH:`pwd`/node_modules/.bin'
+                    'export PATH=$PATH:`pwd`/node_modules/.bin',
                     'http-server -p 4200 dist&',
                     'SERVER_PID=$!',
                     'cypress run --reporter junit --reporter-options \'mochaFile=cypress/results.xml\'',
