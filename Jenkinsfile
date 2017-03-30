@@ -6,7 +6,12 @@ def slackbot_channel = '#frontend-dev'
 
 pipeline {
     agent {
-        label 'cypress'
+        label 'dcos-ui'
+    }
+
+    environment {
+        JENKINS_VERSION = 'yes'
+        NODE_PATH = 'node_modules'
     }
 
     stages {
@@ -42,19 +47,15 @@ pipeline {
                         echo 'Setting-up environment...'
 
                         // Install core things that won't fail
-                        sh '''apt-get update
-                            apt-get install -y python3 python3-setuptools python3-dev python3-pip python3-virtualenv
-                            bash ./scripts/pre-install'''
+                        sh '''bash ./scripts/pre-install'''
 
                         // Install might fail with 'unexpected eof'
                         retry (2) {
-                            sh '''npm install'''
+                            sh '''npm --unsafe-perm install'''
                         }
 
                         // Install npm dependencies
-                        sh '''npm run scaffold
-                            npm install cypress-cli git://github.com/johntron/http-server.git#proxy-secure-flag
-                            ./node_modules/.bin/cypress update'''
+                        sh '''npm run scaffold'''
 
                     }
                 }
@@ -69,22 +70,23 @@ pipeline {
                 parallel lint: {
                     echo 'Running Lint...'
                     ansiColor('xterm') {
-                        sh '''JENKINS_VERSION=yes npm run lint'''
+                        sh '''npm run lint'''
                     }
                 }, test: {
                     echo 'Running Unit Tests...'
                     ansiColor('xterm') {
-                        sh '''JENKINS_VERSION=yes npm run test'''
+                        sh '''npm run test'''
                     }
                 }, build: {
                     echo 'Building DC/OS UI...'
                     ansiColor('xterm') {
-                        sh '''JENKINS_VERSION=yes npm run build-assets'''
+                        sh '''npm run build-assets'''
                     }
                 }, failFast: true
             }
             post {
                 always {
+                    archiveArtifacts 'flag-Loader*'
                     junit 'jest/test-results/*.xml'
                 }
                 success {
@@ -92,6 +94,7 @@ pipeline {
                 }
                 failure {
                     archiveArtifacts 'npm-debug.log'
+                    archiveArtifacts 'jest/config.json'
                 }
             }
         }
@@ -142,29 +145,17 @@ pipeline {
                         string(
                             credentialsId: '8e2b2400-0f14-4e4d-b319-e1360f97627d',
                             variable: 'CCM_AUTH_TOKEN'
-                        ),
-                        string(
-                            credentialsId: 'd146870f-03b0-4f6a-ab70-1d09757a51fc',
-                            variable: 'GITHUB_TOKEN'
                         )
                     ]
                 ) {
                     echo 'Running integration tests..'
                     unstash 'dist'
 
-                    // Install system-test-driver
-                    sh '''if [ ! -d dcos-system-test-driver ]; then
-                        git clone https://mesosphere-ci:${GITHUB_TOKEN}@github.com/mesosphere/dcos-system-test-driver
-                        cd dcos-system-test-driver
-                        python3 setup.py install
-                        cd ..
-                        fi'''
-
                     // Run the `dcos-system-test-driver` locally, that will use
                     // the .systemtest-dev.sh bootstrap config and provision a
                     // cluster for the test.
                     ansiColor('xterm') {
-                        sh '''PATH=`pwd`/node_modules/.bin:$PATH dcos-system-test-driver -v ./system-tests/driver-config/jenkins.sh'''
+                        sh '''dcos-system-test-driver -v ./system-tests/driver-config/jenkins.sh'''
                     }
                 }
             }
