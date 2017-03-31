@@ -236,7 +236,7 @@ describe("Container", function() {
 
       expect(batch.reduce(Container.JSONReducer.bind({}), {})).toEqual({
         docker: {
-          forcePullImage: null,
+          forcePullImage: true,
           image: "foo",
           network: null,
           portMappings: null,
