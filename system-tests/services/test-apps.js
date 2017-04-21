@@ -5,9 +5,11 @@ describe("Services", function() {
   /**
    * Test the applications
    */
-  describe("Applications", function() {
-    beforeEach(function() {
-      cy.visitUrl(`services/overview/%2F${Cypress.env("TEST_UUID")}/create`);
+  describe("Applications", function () {
+
+    beforeEach(function () {
+      cy
+        .visitUrl(`services/overview/%2F${Cypress.env('TEST_UUID')}/create`);
     });
 
     function selectMesosRuntime() {
