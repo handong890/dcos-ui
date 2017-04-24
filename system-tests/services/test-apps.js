@@ -17,7 +17,7 @@ describe("Services", function() {
       cy.contains("Mesos Runtime").click();
     }
 
-    it("Create a simple app", function() {
+    it("should create a simple app", function () {
       const serviceName = "app-with-inline-shell-script";
       const cmdline = "while true; do echo 'test' ; sleep 100 ; done";
 
@@ -96,11 +96,41 @@ describe("Services", function() {
         .contains(serviceName, { timeout: Timeouts.SERVICE_DEPLOYMENT_TIMEOUT })
         .should("exist");
 
-      // Wait for the table and the service to appear
+      // Also no Error should exist
+      cy
+        .get('.page-body-content .alert-content')
+        .should('not.exist');
+
+      // Now click on the name
       cy
         .get(".page-body-content table")
         .getTableRowThatContains(serviceName)
-        .should("exist");
+        .get('a.table-cell-link-primary')
+        .click();
+
+      // open edit screen
+      cy
+        .get('.page-header-actions .dropdown').click()
+        .get('.dropdown-menu-items').contains('Edit').click();
+
+      // check if values are as expected
+      cy
+        .root()
+        .getFormGroupInputFor('Service ID *')
+        .contents('equal', `/${Cypress.env('TEST_UUID')}/${serviceName}`);
+
+      // TODO: Due to a bug in cypress you cannot type values with dots
+      // cy
+      //   .getFormGroupInputFor('CPUs *')
+      //   .contents('equal', '0.5');
+
+      cy
+        .root()
+        .getFormGroupInputFor('Memory (MiB) *')
+        .contents('equal', '10');
+
+      // Test Mesos Runtime again? should be tested before...
+
     });
 
     it("Creates an app with artifacts", function() {
