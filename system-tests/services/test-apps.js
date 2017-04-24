@@ -133,9 +133,59 @@ describe("Services", function() {
 
     });
 
+<<<<<<< HEAD
     it("Creates an app with artifacts", function() {
       const serviceName = "app-with-artifacts";
       const cmdline = "while true; do echo 'test' ; sleep 100 ; done";
+=======
+    it('should fail create the same app again', function () {
+      // same as above
+      const serviceName = 'app-with-inline-shell-script';
+      const cmdline = 'while true; do echo \'test\' ; sleep 100 ; done';
+
+      // Select 'Single Container'
+      cy
+        .contains('Single Container')
+        .click();
+
+      // Fill-in the input elements
+      cy
+        .root()
+        .getFormGroupInputFor('Service ID *')
+        .type(`{selectall}{rightarrow}${serviceName}`);
+
+      cy
+        .root()
+        .getFormGroupInputFor('Command')
+        .type(cmdline);
+
+      // Select mesos runtime
+      selectMesosRuntime();
+
+      // Click Review and Run
+      cy
+        .get('button.button-primary')
+        .contains('Review & Run')
+        .click();
+
+      // Run service
+      cy
+        .get('button.button-primary')
+        .contains('Run Service')
+        .click();
+
+      // Wait for the table and the service to appear
+      cy
+        .get('.page-body-content .alert-content')
+        .contains(`An app with id [/${Cypress.env('TEST_UUID')}/${serviceName}] already exists.`)
+        .should('exist');
+
+    });
+
+    it('Creates an app with artifacts', function () {
+      const serviceName = 'app-with-artifacts';
+      const cmdline = 'while true; do echo \'test\' ; sleep 100 ; done';
+>>>>>>> a7133d35d... DCOS-15287: feat(file): add test to check if new app with same name fails
 
       // Select 'Single Container'
       cy.contains("Single Container").click();
